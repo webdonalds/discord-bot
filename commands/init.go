@@ -4,5 +4,5 @@ import "github.com/bwmarrin/discordgo"
 
 type Command interface {
 	CommandTexts() []string
-	Execute(args []string, msg *discordgo.MessageCreate) (string, error)
+	Execute(args []string, msgChan chan<- string, msg *discordgo.MessageCreate) error
 }

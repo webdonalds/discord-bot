@@ -34,6 +34,17 @@ func (bot *Bot) AddCommand(cmd commands.Command) {
 	}
 }
 
+func (bot *Bot) NewMessageChannel(channelID, mention string) chan<- string {
+	msgChan := make(chan string)
+	go func() {
+		for msg := range msgChan {
+			content := mention + " " + msg
+			_, _ = bot.sess.ChannelMessageSend(channelID, content)
+		}
+	}()
+	return msgChan
+}
+
 func (bot *Bot) Listen() error {
 	bot.sess.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if (m.Author.ID == s.State.User.ID) || (!strings.HasPrefix(m.Content, "!")) {
@@ -44,8 +55,7 @@ func (bot *Bot) Listen() error {
 		cmdText := strings.Replace(texts[0], "!", "", 1)
 		for text, cmd := range bot.cmds {
 			if cmdText == text {
-				respond, _ := cmd.Execute(texts[1:], m)
-				_, _ = s.ChannelMessageSend(m.ChannelID, respond)
+				_ = cmd.Execute(texts[1:], bot.NewMessageChannel(m.ChannelID, m.Author.Mention()), m)
 				break
 			}
 		}

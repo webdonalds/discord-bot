@@ -12,6 +12,7 @@ func (*PingCommand) CommandTexts() []string {
 	return []string{"ping"}
 }
 
-func (*PingCommand) Execute(_ []string, _ *discordgo.MessageCreate) (string, error) {
-	return "pong", nil
+func (*PingCommand) Execute(_ []string, msgChan chan<- string, _ *discordgo.MessageCreate) error {
+	msgChan <- "pong"
+	return nil
 }
