@@ -1,0 +1,22 @@
+name: Build and publish a docker image
+
+on:
+  push:
+    tags: [ 'v*' ]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and push
+      run: |
+        DOCKER_IMAGE=webdonalds/discord-bot
+
+        docker login --username hellodhlyn --password ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+        docker build -t $DOCKER_IMAGE:latest .
+        docker tag $DOCKER_IMAGE:latest $DOCKER_IMAGE:${GITHUB_REF##*/}
+
+        docker push $DOCKER_IMAGE:latest
+        docker push $DOCKER_IMAGE:${GITHUB_REF##*/}

@@ -14,6 +14,7 @@ func main() {
 
 	bot.AddCommand(commands.NewPingCommand())
 	bot.AddCommand(commands.NewDeliveryCommand())
+	bot.AddCommand(commands.NewHelpCommand())
 
 	err = bot.Listen()
 	if err != nil {
