@@ -57,7 +57,7 @@ func (svc *DeliveryService) Track(carrierName, trackID string, msgChan chan<- st
 		return nil
 	}
 
-	progress := track.Progresses[len(track.Progresses)-2]
+	progress := track.Progresses[len(track.Progresses)-1]
 	if timestamp == nil || progress.Time.After(*timestamp) {
 		timeAgo := int64(time.Now().Sub(*progress.Time) / time.Minute)
 		msgChan <- fmt.Sprintf("[배송 정보]\n운송장 : %s %s\n배송 현황 : %s\n현재 위치 : %s\n\n%s (업데이트 : %d분 전)",
