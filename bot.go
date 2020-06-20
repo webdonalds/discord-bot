@@ -55,7 +55,12 @@ func (bot *Bot) Listen() error {
 		cmdText := strings.Replace(texts[0], "!", "", 1)
 		for text, cmd := range bot.cmds {
 			if cmdText == text {
-				_ = cmd.Execute(texts[1:], bot.NewMessageChannel(m.ChannelID, m.Author.Mention()), m)
+				msgChan := bot.NewMessageChannel(m.ChannelID, m.Author.Mention())
+				err := cmd.Execute(texts[1:], msgChan, m)
+				if err != nil {
+					fmt.Printf("%v\n", err)
+					msgChan <- "오류가 발생했습니다. 서버 로그을 확인하세요."
+				}
 				break
 			}
 		}
