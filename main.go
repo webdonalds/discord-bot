@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/webdonalds/discord-bot/commands"
 	"os"
+
+	"github.com/webdonalds/discord-bot/commands"
 )
 
 func main() {
@@ -15,6 +16,7 @@ func main() {
 	bot.AddCommand(commands.NewPingCommand())
 	bot.AddCommand(commands.NewDeliveryCommand())
 	bot.AddCommand(commands.NewHelpCommand())
+	bot.AddCommand(commands.NewTimerCommand())
 
 	err = bot.Listen()
 	if err != nil {

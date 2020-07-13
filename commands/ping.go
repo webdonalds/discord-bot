@@ -1,6 +1,10 @@
 package commands
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"github.com/bwmarrin/discordgo"
+
+	"github.com/webdonalds/discord-bot/background"
+)
 
 type PingCommand struct{}
 
@@ -12,7 +16,6 @@ func (*PingCommand) CommandTexts() []string {
 	return []string{"ping"}
 }
 
-func (*PingCommand) Execute(_ []string, msgChan chan<- string, _ *discordgo.MessageCreate) error {
-	msgChan <- "pong"
-	return nil
+func (*PingCommand) Execute(_ []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
+	return "pong", nil, nil
 }

@@ -8,12 +8,15 @@ import (
 	"syscall"
 
 	"github.com/bwmarrin/discordgo"
+
+	"github.com/webdonalds/discord-bot/background"
 	"github.com/webdonalds/discord-bot/commands"
 )
 
 type Bot struct {
-	sess *discordgo.Session
-	cmds map[string]commands.Command
+	sess   *discordgo.Session
+	cmds   map[string]commands.Command
+	worker *background.Worker
 }
 
 func NewBot(token string) (*Bot, error) {
@@ -23,8 +26,9 @@ func NewBot(token string) (*Bot, error) {
 	}
 
 	return &Bot{
-		sess: sess,
-		cmds: map[string]commands.Command{},
+		sess:   sess,
+		cmds:   map[string]commands.Command{},
+		worker: background.NewWorker(sess),
 	}, nil
 }
 
@@ -32,17 +36,6 @@ func (bot *Bot) AddCommand(cmd commands.Command) {
 	for _, cmdText := range cmd.CommandTexts() {
 		bot.cmds[cmdText] = cmd
 	}
-}
-
-func (bot *Bot) NewMessageChannel(channelID, mention string) chan<- string {
-	msgChan := make(chan string)
-	go func() {
-		for msg := range msgChan {
-			content := mention + " " + msg
-			_, _ = bot.sess.ChannelMessageSend(channelID, content)
-		}
-	}()
-	return msgChan
 }
 
 func (bot *Bot) Listen() error {
@@ -55,16 +48,23 @@ func (bot *Bot) Listen() error {
 		cmdText := strings.Replace(texts[0], "!", "", 1)
 		for text, cmd := range bot.cmds {
 			if cmdText == text {
-				msgChan := bot.NewMessageChannel(m.ChannelID, m.Author.Mention())
-				err := cmd.Execute(texts[1:], msgChan, m)
+				msg, watcher, err := cmd.Execute(texts[1:], m)
 				if err != nil {
 					fmt.Printf("%v\n", err)
-					msgChan <- "오류가 발생했습니다. 서버 로그을 확인하세요."
+					msg = "오류가 발생했습니다. 서버 로그을 확인하세요."
+				}
+				if msg != "" {
+					_, _ = s.ChannelMessageSend(m.ChannelID, msg)
+				}
+				if watcher != nil {
+					bot.worker.AddWatcher(watcher, m.ChannelID, m.Author.Mention())
 				}
 				break
 			}
 		}
 	})
+
+	bot.worker.Start()
 
 	err := bot.sess.Open()
 	if err != nil {
