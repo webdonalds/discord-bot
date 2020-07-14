@@ -55,7 +55,7 @@ func (w *DeliveryWatcher) Run() (string, Watcher, error) {
 		return "배송이 완료되었습니다.", nil, nil
 	}
 
-	var timeCursor *time.Time
+	var timeCursor = w.timeCursor
 	var trackMsg string
 	if len(track.Progresses) > 0 && (w.timeCursor == nil || track.Progresses[len(track.Progresses)-1].Time.After(*w.timeCursor)) {
 		progress := track.Progresses[len(track.Progresses)-1]
