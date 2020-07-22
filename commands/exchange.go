@@ -102,7 +102,7 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 	change := exchangeData[1]
 	changePercent := exchangeData[2]
 
-	actualPrice := exchangeData[0].(float64) * targetPrice // 환율 적용한 액수
+	actualPrice := price.(float64) * targetPrice // 환율 적용한 액수
 
 	// 결과물 출력
 	msg := fmt.Sprintf("%s: %s %s 는 %s %s 입니다. (1 %s = %.2f %s)\n전일 대비 변화량: %.1f %s.\n전일 대비 변화량(%%): %.1f%%.",
