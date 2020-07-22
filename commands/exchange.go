@@ -15,7 +15,7 @@ import (
 
 type ExchangeCommand struct{}
 
-const exchageHelpMsg = "사용법: !환율 <통화쌍> <액수>\n에시: !환율 USDKRW 4\n사용 가능한 통화쌍 리스트는 깃헙 페이지 참조"
+const exchageHelpMsg = "사용법: !환율 <통화쌍> <액수>\n예시: !환율 USDKRW 4\n사용 가능한 통화쌍 리스트는 깃헙 페이지 참조"
 
 const availableList = `
 AUDCNY AUDEUR AUDGBP AUDJPY AUDKRW AUDUSD
