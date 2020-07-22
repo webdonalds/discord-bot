@@ -17,6 +17,7 @@ func main() {
 	bot.AddCommand(commands.NewDeliveryCommand())
 	bot.AddCommand(commands.NewHelpCommand())
 	bot.AddCommand(commands.NewTimerCommand())
+	bot.AddCommand(commands.NewExchangeCommand())
 
 	err = bot.Listen()
 	if err != nil {
