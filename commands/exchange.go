@@ -53,7 +53,11 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 		return exchageHelpMsg, nil, nil
 	}
 
-	if strings.Contains(availableList, args[0]) == false {
+	//통화쌍
+	currencyPair := args[0]
+	orig_price := args[1]
+
+	if strings.Contains(availableList, currencyPair) == false {
 		return "지원하지 않는 국가 코드입니다.", nil, nil
 	}
 
@@ -64,7 +68,7 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 	}
 
 	// API 읽어오기
-	url := api + args[0]
+	url := api + currencyPair
 
 	req, err := http.Get(url)
 
@@ -87,19 +91,24 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 	if jsonErr != nil {
 		return "환율 json 처리 에러", nil, jsonErr
 	}
-	exchangeData := res[args[0]].([]interface{})
+	exchangeData := res[currencyPair].([]interface{})
 
 	// 통화 단위
-	orig := args[0][0:3]
-	target := args[0][3:6]
+	orig := currencyPair[0:3]
+	target := currencyPair[3:6]
 
-	price := exchangeData[0].(float64) * targetPrice // 환율 적용한 액수
+	// json 데이터 캐싱
+	price := exchangeData[0]
+	change := exchangeData[1]
+	changePercent := exchangeData[2]
+
+	actualPrice := exchangeData[0].(float64) * targetPrice // 환율 적용한 액수
 
 	// 결과물 출력
 	msg := fmt.Sprintf("%s: %s %s 는 %s %s 입니다. (1 %s = %.2f %s)\n전일 대비 변화량: %.1f %s.\n전일 대비 변화량(%%): %.1f%%.",
-		args[0], args[1], orig, strconv.FormatFloat(price, 'f', -1, 32), target,
-		orig, exchangeData[0], target,
-		exchangeData[1], target, exchangeData[2])
+		currencyPair, orig_price, orig, strconv.FormatFloat(actualPrice, 'f', -1, 32), target,
+		orig, price, target,
+		change, target, changePercent)
 
 	return msg, nil, nil
 }
