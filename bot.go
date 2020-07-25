@@ -48,7 +48,13 @@ func (bot *Bot) Listen() error {
 		cmdText := strings.Replace(texts[0], "!", "", 1)
 		for text, cmd := range bot.cmds {
 			if cmdText == text {
-				msg, watcher, err := cmd.Execute(texts[1:], m)
+				args := texts[1:]
+				if len(args) != cmd.ExpectedArgsLen() {
+					_, _ = s.ChannelMessageSend(m.ChannelID, "파라미터 개수가 올바르지 않습니다.")
+					break
+				}
+
+				msg, watcher, err := cmd.Execute(args, m)
 				if err != nil {
 					fmt.Printf("%v\n", err)
 					msg = "오류가 발생했습니다. 서버 로그을 확인하세요."

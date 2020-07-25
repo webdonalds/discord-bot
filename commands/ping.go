@@ -16,6 +16,10 @@ func (*PingCommand) CommandTexts() []string {
 	return []string{"ping"}
 }
 
+func (*PingCommand) ExpectedArgsLen() int {
+	return 0
+}
+
 func (*PingCommand) Execute(_ []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
 	return "pong", nil, nil
 }
