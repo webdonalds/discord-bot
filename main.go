@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/webdonalds/discord-bot/commands"
 	"github.com/webdonalds/discord-bot/crons"
 )
@@ -26,4 +28,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
 }

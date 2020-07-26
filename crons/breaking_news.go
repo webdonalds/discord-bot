@@ -1,12 +1,12 @@
 package crons
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
+	log "github.com/sirupsen/logrus"
 )
 
 type BreakingNewsCron struct {
@@ -48,12 +48,13 @@ func (cron *BreakingNewsCron) Execute() string {
 		ExcludeReplies:  twitter.Bool(true),
 	})
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		log.Errorf("failed to poll tweets: %v", err)
 		return ""
 	}
 
 	if len(tweets) > 0 {
 		cron.lastTweetID = tweets[0].ID
+		log.Infof("polled %d tweets, last tweet id: %d", len(tweets), cron.lastTweetID)
 	}
 
 	texts := []string{}

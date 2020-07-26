@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/signal"
 	"strings"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/robfig/cron/v3"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/webdonalds/discord-bot/background"
 	"github.com/webdonalds/discord-bot/commands"
@@ -73,7 +73,7 @@ func (bot *Bot) Listen() error {
 
 				msg, watcher, err := cmd.Execute(args, m)
 				if err != nil {
-					fmt.Printf("%v\n", err)
+					log.Error(err)
 					msg = "오류가 발생했습니다. 서버 로그을 확인하세요."
 				}
 				if msg != "" {
@@ -95,11 +95,11 @@ func (bot *Bot) Listen() error {
 		return err
 	}
 
-	fmt.Println("Bot has been started.")
+	log.Info("Bot has been started.")
 	sigChan := make(chan os.Signal)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sigChan
 
-	fmt.Println("Terminating...")
+	log.Warn("Terminating...")
 	return bot.sess.Close()
 }
