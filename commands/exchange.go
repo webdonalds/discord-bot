@@ -47,6 +47,10 @@ func (*ExchangeCommand) CommandTexts() []string {
 	return []string{"환율"}
 }
 
+func (*ExchangeCommand) ExpectedArgsLen() int {
+	return 2
+}
+
 func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
 	// 예외 처리
 	if len(args) != 2 {

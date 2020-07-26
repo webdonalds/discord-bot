@@ -16,6 +16,8 @@ const helpMsg = `
 
 !타이머 <시간> <메시지>
 !timer <시간> <메시지>
+
+!환율 <통화쌍> <금액>
 `
 
 func NewHelpCommand() Command {
@@ -24,6 +26,10 @@ func NewHelpCommand() Command {
 
 func (*HelpCommand) CommandTexts() []string {
 	return []string{"help", "도움"}
+}
+
+func (*HelpCommand) ExpectedArgsLen() int {
+	return 0
 }
 
 func (*HelpCommand) Execute(_ []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
