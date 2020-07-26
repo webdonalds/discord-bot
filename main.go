@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/webdonalds/discord-bot/commands"
+	"github.com/webdonalds/discord-bot/crons"
 )
 
 func main() {
@@ -18,6 +19,8 @@ func main() {
 	bot.AddCommand(commands.NewHelpCommand())
 	bot.AddCommand(commands.NewTimerCommand())
 	bot.AddCommand(commands.NewExchangeCommand())
+
+	bot.AddCron(crons.NewBreakingNewsCron())
 
 	err = bot.Listen()
 	if err != nil {
