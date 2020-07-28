@@ -3,7 +3,10 @@ package main
 import (
 	"os"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/webdonalds/discord-bot/commands"
+	"github.com/webdonalds/discord-bot/crons"
 )
 
 func main() {
@@ -19,8 +22,14 @@ func main() {
 	bot.AddCommand(commands.NewTimerCommand())
 	bot.AddCommand(commands.NewExchangeCommand())
 
+	bot.AddCron(crons.NewBreakingNewsCron())
+
 	err = bot.Listen()
 	if err != nil {
 		panic(err)
 	}
+}
+
+func init() {
+	log.SetFormatter(&log.JSONFormatter{})
 }
