@@ -9,6 +9,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const yonhapNewsUserID = 147451838
+
 type BreakingNewsCron struct {
 	twitterClient *twitter.Client
 	lastTweetID   int64
@@ -42,7 +44,7 @@ func (*BreakingNewsCron) ChannelID() string {
 
 func (cron *BreakingNewsCron) Execute() string {
 	tweets, _, err := cron.twitterClient.Timelines.UserTimeline(&twitter.UserTimelineParams{
-		UserID:          147451838,
+		UserID:          yonhapNewsUserID,
 		SinceID:         cron.lastTweetID,
 		IncludeRetweets: twitter.Bool(false),
 		ExcludeReplies:  twitter.Bool(true),
