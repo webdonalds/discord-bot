@@ -11,16 +11,14 @@ import (
 	"github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/webdonalds/discord-bot/background"
 	"github.com/webdonalds/discord-bot/commands"
 	"github.com/webdonalds/discord-bot/crons"
 )
 
 type Bot struct {
-	sess   *discordgo.Session
-	cmds   map[string]commands.Command
-	cron   *cron.Cron
-	worker *background.Worker
+	sess *discordgo.Session
+	cmds map[string]commands.Command
+	cron *cron.Cron
 }
 
 func NewBot(token string) (*Bot, error) {
@@ -33,10 +31,9 @@ func NewBot(token string) (*Bot, error) {
 	cron := cron.New(cron.WithLocation(loc))
 
 	return &Bot{
-		sess:   sess,
-		cmds:   map[string]commands.Command{},
-		cron:   cron,
-		worker: background.NewWorker(sess),
+		sess: sess,
+		cmds: map[string]commands.Command{},
+		cron: cron,
 	}, nil
 }
 
@@ -71,7 +68,7 @@ func (bot *Bot) Listen() error {
 					break
 				}
 
-				msg, watcher, err := cmd.Execute(args, m)
+				msg, _, err := cmd.Execute(args, m)
 				if err != nil {
 					log.Error(err)
 					msg = "오류가 발생했습니다. 서버 로그을 확인하세요."
@@ -79,16 +76,12 @@ func (bot *Bot) Listen() error {
 				if msg != "" {
 					_, _ = s.ChannelMessageSend(m.ChannelID, msg)
 				}
-				if watcher != nil {
-					bot.worker.AddWatcher(watcher, m.ChannelID, m.Author.Mention())
-				}
 				break
 			}
 		}
 	})
 
 	bot.cron.Start()
-	bot.worker.Start()
 
 	err := bot.sess.Open()
 	if err != nil {
