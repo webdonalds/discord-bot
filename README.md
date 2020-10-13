@@ -23,6 +23,7 @@
 ### 환경변수
 
 - `DISCORD_BOT_TOKEN`
+- `ERROR_LOG_WEBHOOK_URL`
 
 ### 환율 조회 사용 가능한 통화쌍
 * 호주 : `AUDCNY, AUDEUR, AUDGBP, AUDJPY, AUDKRW, AUDUSD`

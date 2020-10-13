@@ -2,9 +2,11 @@ package main
 
 import (
 	"os"
+	"time"
 
 	"github.com/go-redis/redis/v8"
-	"github.com/hellodhlyn/delivery-tracker"
+	deliverytracker "github.com/hellodhlyn/delivery-tracker"
+	"github.com/kz/discordrus"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/webdonalds/discord-bot/commands"
@@ -55,4 +57,18 @@ func main() {
 
 func init() {
 	log.SetFormatter(&log.JSONFormatter{})
+	loc, _ := time.LoadLocation("Asia/Seoul")
+
+	log.AddHook(discordrus.NewHook(
+		// Use environment variable for security reasons
+		os.Getenv("ERROR_LOG_WEBHOOK_URL"),
+		// Set minimum level to DebugLevel to receive all log entries
+		log.WarnLevel,
+		&discordrus.Opts{
+			Username:         "ErrorBot",
+			DisableTimestamp: false,                      // Setting this to true will disable timestamps from appearing in the footer
+			TimestampFormat:  "Jan 2 15:04:05.00000 MST", // The timestamp takes this format; if it is unset, it will take log' default format
+			TimestampLocale:  loc,                        // The timestamp uses this locale; if it is unset, it will use time.Local
+		},
+	))
 }
