@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -8,15 +9,16 @@ import (
 	"github.com/hellodhlyn/delivery-tracker"
 
 	"github.com/webdonalds/discord-bot/background"
+	"github.com/webdonalds/discord-bot/repositories"
 )
 
 type DeliveryCommand struct {
+	repo          repositories.DeliveryTrackRepository
 	trackerClient deliverytracker.Client
 }
 
-func NewDeliveryCommand() Command {
-	client, _ := deliverytracker.NewClient()
-	return &DeliveryCommand{trackerClient: client}
+func NewDeliveryCommand(repo repositories.DeliveryTrackRepository, trackerClient deliverytracker.Client) Command {
+	return &DeliveryCommand{repo: repo, trackerClient: trackerClient}
 }
 
 func (*DeliveryCommand) CommandTexts() []string {
@@ -27,7 +29,7 @@ func (*DeliveryCommand) ExpectedArgsLen() int {
 	return 2
 }
 
-func (cmd *DeliveryCommand) Execute(args []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
+func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate) (string, background.Watcher, error) {
 	carrierName := args[0]
 	trackID := args[1]
 
@@ -48,7 +50,7 @@ func (cmd *DeliveryCommand) Execute(args []string, _ *discordgo.MessageCreate) (
 		return "이미 배송이 완료되었습니다.", nil, nil
 	}
 
-	var timeCursor *time.Time
+	var lastTimestamp *time.Time
 	var trackMsg string
 	if len(track.Progresses) > 0 {
 		progress := track.Progresses[len(track.Progresses)-1]
@@ -59,9 +61,12 @@ func (cmd *DeliveryCommand) Execute(args []string, _ *discordgo.MessageCreate) (
 			carriers[0].Name, trackID, progress.Status.Text, progress.Location.Name, progress.Description, timeAgo,
 		)
 
-		timeCursor = progress.Time
+		lastTimestamp = progress.Time
 	}
 
-	watcher := background.NewDeliveryWatcher(carrierID, trackID, timeCursor, cmd.trackerClient)
-	return fmt.Sprintf("%s배송 상태에 변경이 있을 시 30분 간격으로 알림을 발송합니다.", trackMsg), watcher, nil
+	runAt := time.Now().Add(20 * time.Minute)
+	err = cmd.repo.Append(context.Background(), &repositories.DeliveryTrack{
+		Mention: msg.Author.Mention(), CarrierID: carrierID, TrackID: trackID, LastTimestamp: lastTimestamp,
+	}, &runAt)
+	return fmt.Sprintf("%s배송 상태에 변경이 있을 시 20분 간격으로 알림을 발송합니다.", trackMsg), nil, err
 }
