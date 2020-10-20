@@ -36,8 +36,6 @@ func (cron DeliveryTrackCron) Execute() string {
 		return ""
 	}
 
-	fmt.Println(tracks)
-
 	msg := ""
 	for _, trackData := range tracks {
 		track, err := cron.trackerClient.GetTrack(trackData.CarrierID, trackData.TrackID)
@@ -52,10 +50,15 @@ func (cron DeliveryTrackCron) Execute() string {
 		var lastTimestamp *time.Time
 		if len(track.Progresses) > 0 {
 			// 새로운 배송 추적 데이터가 있는 경우 메시지 발송
-			// FIXME - 시간 순서로 내려오지 않는 경우 대응
-			lastProgress := track.Progresses[len(track.Progresses)-1]
+			lastProgress := *track.Progresses[0]
+			for _, p := range track.Progresses {
+				if p.Time.After(*lastProgress.Time) {
+					lastProgress = *p
+				}
+			}
 			lastTimestamp = lastProgress.Time
-			if lastProgress.Time.After(*trackData.LastTimestamp) {
+
+			if trackData.LastTimestamp == nil || lastProgress.Time.After(*trackData.LastTimestamp) {
 				minuteAgo := int64(time.Now().Sub(*lastProgress.Time) / time.Minute)
 				msg += fmt.Sprintf(
 					"%s\n[배송 정보]\n운송장 : %s %s\n배송 현황 : %s\n현재 위치 : %s\n\n%s (업데이트 : %d분 전)\n\n",
