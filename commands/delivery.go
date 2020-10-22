@@ -10,6 +10,7 @@ import (
 
 	"github.com/webdonalds/discord-bot/background"
 	"github.com/webdonalds/discord-bot/repositories"
+	"github.com/webdonalds/discord-bot/responses"
 )
 
 type DeliveryCommand struct {
@@ -29,25 +30,25 @@ func (*DeliveryCommand) ExpectedArgsLen() int {
 	return 2
 }
 
-func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate) (string, background.Watcher, error) {
+func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate) (responses.Response, background.Watcher, error) {
 	carrierName := args[0]
 	trackID := args[1]
 
 	carriers, err := cmd.trackerClient.FindCarriersByName(carrierName)
 	if len(carriers) != 1 {
-		return "해당하는 이름의 택배사를 찾을 수 없습니다.", nil, nil
+		return responses.NewSimpleResponse("해당하는 이름의 택배사를 찾을 수 없습니다."), nil, nil
 	} else if err != nil {
-		return "", nil, err
+		return nil, nil, err
 	}
 
 	carrierID := carriers[0].ID
 	track, err := cmd.trackerClient.GetTrack(carrierID, trackID)
 	if err != nil {
-		return "", nil, err
+		return responses.NewSimpleResponse(""), nil, err
 	} else if track == nil {
-		return "올바르지 않은 운송장이거나, 택배사에서 아직 물건을 인수하지 않았습니다.", nil, nil
+		return responses.NewSimpleResponse("올바르지 않은 운송장이거나, 택배사에서 아직 물건을 인수하지 않았습니다."), nil, nil
 	} else if track.State != nil && track.State.ID == "delivered" {
-		return "이미 배송이 완료되었습니다.", nil, nil
+		return responses.NewSimpleResponse("이미 배송이 완료되었습니다."), nil, nil
 	}
 
 	var lastTimestamp *time.Time
@@ -68,5 +69,5 @@ func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate)
 	err = cmd.repo.Append(context.Background(), &repositories.DeliveryTrack{
 		Mention: msg.Author.Mention(), CarrierID: carrierID, TrackID: trackID, LastTimestamp: lastTimestamp,
 	}, &runAt)
-	return fmt.Sprintf("%s배송 상태에 변경이 있을 시 20분 간격으로 알림을 발송합니다.", trackMsg), nil, err
+	return responses.NewSimpleResponse(fmt.Sprintf("%s배송 상태에 변경이 있을 시 20분 간격으로 알림을 발송합니다.", trackMsg)), nil, err
 }

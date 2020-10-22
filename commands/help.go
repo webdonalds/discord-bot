@@ -4,6 +4,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 
 	"github.com/webdonalds/discord-bot/background"
+	"github.com/webdonalds/discord-bot/responses"
 )
 
 type HelpCommand struct{}
@@ -32,6 +33,6 @@ func (*HelpCommand) ExpectedArgsLen() int {
 	return 0
 }
 
-func (*HelpCommand) Execute(_ []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
-	return helpMsg, nil, nil
+func (*HelpCommand) Execute(_ []string, _ *discordgo.MessageCreate) (responses.Response, background.Watcher, error) {
+	return responses.NewSimpleResponse(helpMsg), nil, nil
 }

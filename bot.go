@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/webdonalds/discord-bot/responses"
 	"os"
 	"os/signal"
 	"strings"
@@ -68,13 +69,13 @@ func (bot *Bot) Listen() error {
 					break
 				}
 
-				msg, _, err := cmd.Execute(args, m)
+				res, _, err := cmd.Execute(args, m)
 				if err != nil {
 					log.Error(err)
-					msg = "오류가 발생했습니다. 서버 로그을 확인하세요."
+					res = responses.NewSimpleResponse("오류가 발생했습니다. 서버 로그을 확인하세요.")
 				}
-				if msg != "" {
-					_, _ = s.ChannelMessageSend(m.ChannelID, msg)
+				if res != nil {
+					_, _ = s.ChannelMessageSendComplex(m.ChannelID, res.ToDiscordMessage())
 				}
 				break
 			}
