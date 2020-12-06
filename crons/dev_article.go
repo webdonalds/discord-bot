@@ -36,8 +36,7 @@ func NewDevArticleCron(repo repositories.DevArticleRepository) Cron {
 }
 
 func (cron *DevArticleCron) Pattern() string {
-	return "@every 1m"
-	// return "0 10 * * *" // 10AM KST
+	return "0 10 * * *" // 10AM KST
 }
 
 func (cron *DevArticleCron) ChannelID() string {
