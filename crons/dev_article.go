@@ -77,8 +77,8 @@ func (cron *DevArticleCron) Execute() string {
 }
 
 func (cron *DevArticleCron) containID(articleIDs []string, articleID string) bool {
-	for _, i := range articleIDs {
-		if i == articleID {
+	for _, id := range articleIDs {
+		if id == articleID {
 			return true
 		}
 	}
