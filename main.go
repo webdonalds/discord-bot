@@ -38,6 +38,7 @@ func main() {
 
 	// Initialize repositories
 	dtRepo, _ := repositories.NewRedisDeliveryTrackRepository(rdb)
+	daRepo, _ := repositories.NewRedisDevArticleRepository(rdb)
 
 	// Register commands and crons
 	bot.AddCommand(commands.NewPingCommand())
@@ -48,6 +49,7 @@ func main() {
 
 	bot.AddCron(crons.NewBreakingNewsCron())
 	bot.AddCron(crons.NewDeliveryTrackCron(dtRepo, trackClient))
+	bot.AddCron(crons.NewDevArticleCron(daRepo))
 
 	err = bot.Listen()
 	if err != nil {
