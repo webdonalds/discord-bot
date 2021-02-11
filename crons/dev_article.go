@@ -13,7 +13,7 @@ import (
 	"github.com/webdonalds/discord-bot/repositories"
 )
 
-const crawlURL = "https://awesome-devblog-v2-beta-backend.vercel.app/api/korean/people/feeds/rank?day=14&size=14"
+const crawlURL = "https://awesome-devblog-backend-korean-people.vercel.app/api/korean/people/feeds/rank?day=14&size=10"
 
 type DevArticle struct {
 	ID          string    `json:"_id"`
