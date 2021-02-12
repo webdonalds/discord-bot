@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/avast/retry-go"
 	"github.com/hellodhlyn/delivery-tracker"
 	log "github.com/sirupsen/logrus"
 
@@ -38,7 +39,11 @@ func (cron DeliveryTrackCron) Execute() string {
 
 	msg := ""
 	for _, trackData := range tracks {
-		track, err := cron.trackerClient.GetTrack(trackData.CarrierID, trackData.TrackID)
+		var track *deliverytracker.Track
+		err = retry.Do(func() error {
+			track, err = cron.trackerClient.GetTrack(trackData.CarrierID, trackData.TrackID)
+			return err
+		})
 		if err != nil {
 			log.Errorf("failed to fetch track info (carrierID: %s, trackID: %s)\n%v", trackData.CarrierID, trackData.TrackID, err)
 			continue
