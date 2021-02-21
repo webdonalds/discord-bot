@@ -24,8 +24,8 @@ func (*TimerCommand) CommandTexts() []string {
 	return []string{"timer", "타이머"}
 }
 
-func (*TimerCommand) ExpectedArgsLen() int {
-	return 2
+func (*TimerCommand) ExpectedArgsLen() (int, int) {
+	return 2, 2
 }
 
 func (c *TimerCommand) Execute(args []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {

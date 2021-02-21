@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/hellodhlyn/delivery-tracker"
+	deliverytracker "github.com/hellodhlyn/delivery-tracker"
 
 	"github.com/webdonalds/discord-bot/background"
 	"github.com/webdonalds/discord-bot/repositories"
@@ -25,8 +25,8 @@ func (*DeliveryCommand) CommandTexts() []string {
 	return []string{"택배"}
 }
 
-func (*DeliveryCommand) ExpectedArgsLen() int {
-	return 2
+func (*DeliveryCommand) ExpectedArgsLen() (int, int) {
+	return 2, 2
 }
 
 func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate) (string, background.Watcher, error) {

@@ -63,7 +63,8 @@ func (bot *Bot) Listen() error {
 		for text, cmd := range bot.cmds {
 			if cmdText == text {
 				args := texts[1:]
-				if len(args) != cmd.ExpectedArgsLen() {
+				minExpectedArgsLen, maxExpectedArgsLen := cmd.ExpectedArgsLen()
+				if len(args) < minExpectedArgsLen || len(args) > maxExpectedArgsLen {
 					_, _ = s.ChannelMessageSend(m.ChannelID, "파라미터 개수가 올바르지 않습니다.")
 					break
 				}
