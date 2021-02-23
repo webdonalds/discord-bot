@@ -7,6 +7,5 @@ import (
 
 type Command interface {
 	CommandTexts() []string
-	ExpectedArgsLen() int
 	Execute(args []string, msg *discordgo.MessageCreate) (string, background.Watcher, error)
 }

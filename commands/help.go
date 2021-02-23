@@ -28,10 +28,6 @@ func (*HelpCommand) CommandTexts() []string {
 	return []string{"help", "도움"}
 }
 
-func (*HelpCommand) ExpectedArgsLen() int {
-	return 0
-}
-
 func (*HelpCommand) Execute(_ []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
 	return helpMsg, nil, nil
 }

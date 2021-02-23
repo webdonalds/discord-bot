@@ -10,6 +10,8 @@ import (
 	"github.com/webdonalds/discord-bot/background"
 )
 
+const timerHelpMsg = "사용법: !타이머 <시간> <메시지>\n예시: !타이머 9h 퇴근시간"
+
 type TimerCommand struct {
 	re *regexp.Regexp
 }
@@ -24,11 +26,11 @@ func (*TimerCommand) CommandTexts() []string {
 	return []string{"timer", "타이머"}
 }
 
-func (*TimerCommand) ExpectedArgsLen() int {
-	return 2
-}
-
 func (c *TimerCommand) Execute(args []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
+	if len(args) != 2 {
+		return timerHelpMsg, nil, nil
+	}
+
 	duration, err := time.ParseDuration(args[0])
 	if err != nil {
 		return "시간 패턴을 파싱할 수 없습니다.", nil, nil
