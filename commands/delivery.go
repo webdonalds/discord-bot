@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	deliverytracker "github.com/hellodhlyn/delivery-tracker"
+	"github.com/hellodhlyn/delivery-tracker"
 
 	"github.com/webdonalds/discord-bot/background"
 	"github.com/webdonalds/discord-bot/repositories"
