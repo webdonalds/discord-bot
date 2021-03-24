@@ -3,6 +3,7 @@ module github.com/webdonalds/discord-bot
 go 1.14
 
 require (
+	github.com/avast/retry-go v3.0.0+incompatible
 	github.com/bwmarrin/discordgo v0.20.3
 	github.com/dghubble/go-twitter v0.0.0-20200725221434-4bc8ad7ad1b4
 	github.com/dghubble/oauth1 v0.6.0

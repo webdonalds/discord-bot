@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/avast/retry-go"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	log "github.com/sirupsen/logrus"
@@ -43,11 +44,15 @@ func (*BreakingNewsCron) ChannelID() string {
 }
 
 func (cron *BreakingNewsCron) Execute() string {
-	tweets, _, err := cron.twitterClient.Timelines.UserTimeline(&twitter.UserTimelineParams{
-		UserID:          yonhapNewsUserID,
-		SinceID:         cron.lastTweetID,
-		IncludeRetweets: twitter.Bool(false),
-		ExcludeReplies:  twitter.Bool(true),
+	var tweets []twitter.Tweet
+	err := retry.Do(func() (err error) {
+		tweets, _, err = cron.twitterClient.Timelines.UserTimeline(&twitter.UserTimelineParams{
+			UserID:          yonhapNewsUserID,
+			SinceID:         cron.lastTweetID,
+			IncludeRetweets: twitter.Bool(false),
+			ExcludeReplies:  twitter.Bool(true),
+		})
+		return err
 	})
 	if err != nil {
 		log.Errorf("failed to poll tweets: %v", err)

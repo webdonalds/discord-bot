@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/avast/retry-go"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/webdonalds/discord-bot/repositories"
@@ -44,21 +45,27 @@ func (cron *DevArticleCron) ChannelID() string {
 }
 
 func (cron *DevArticleCron) Execute() string {
-	ctx := context.Background()
-	res, err := http.Get(crawlURL)
-	if err != nil {
-		log.Errorf("failed to read articles: %v", err)
-		return ""
-	}
-
-	defer func() { _ = res.Body.Close() }()
 	var articles []DevArticle
-	err = json.NewDecoder(res.Body).Decode(&articles)
+	err := retry.Do(func() error {
+		res, err := http.Get(crawlURL)
+		if err != nil {
+			return err
+		}
+
+		defer func() { _ = res.Body.Close() }()
+		err = json.NewDecoder(res.Body).Decode(&articles)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
-		log.Errorf("failed to parse articles: %v", err)
+		log.Errorf("failed to read or parse articles: %v", err)
 		return ""
 	}
 
+	ctx := context.Background()
 	readArticleIDs, err := cron.repo.ListAllReadArticleID(ctx)
 	if err != nil {
 		log.Errorf("failed to list read articles: %v", err)
