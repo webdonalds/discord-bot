@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"os/signal"
+	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -16,9 +17,10 @@ import (
 )
 
 type Bot struct {
-	sess *discordgo.Session
-	cmds map[string]commands.Command
-	cron *cron.Cron
+	sess     *discordgo.Session
+	cmds     map[string]commands.Command
+	cmdRegex *regexp.Regexp
+	cron     *cron.Cron
 }
 
 func NewBot(token string) (*Bot, error) {
@@ -30,10 +32,13 @@ func NewBot(token string) (*Bot, error) {
 	loc, _ := time.LoadLocation("Asia/Seoul")
 	cron := cron.New(cron.WithLocation(loc))
 
+	cmdRegex, _ := regexp.Compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'")
+
 	return &Bot{
-		sess: sess,
-		cmds: map[string]commands.Command{},
-		cron: cron,
+		sess:     sess,
+		cmds:     map[string]commands.Command{},
+		cmdRegex: cmdRegex,
+		cron:     cron,
 	}, nil
 }
 
@@ -58,13 +63,19 @@ func (bot *Bot) Listen() error {
 			return
 		}
 
-		texts := strings.Split(m.Content, " ")
-		cmdText := strings.Replace(texts[0], "!", "", 1)
+		splits := strings.SplitN(m.Content, " ", 2)
+		cmdText := strings.Replace(splits[0], "!", "", 1)
+
+		cmdArgs := []string{}
+		if len(splits) == 2 {
+			for _, word := range bot.cmdRegex.FindAllString(splits[1], -1) {
+				cmdArgs = append(cmdArgs, strings.ReplaceAll(strings.ReplaceAll(word, "\"", ""), "'", ""))
+			}
+		}
+
 		for text, cmd := range bot.cmds {
 			if cmdText == text {
-				args := texts[1:]
-
-				msg, _, err := cmd.Execute(args, m)
+				msg, _, err := cmd.Execute(cmdArgs, m)
 				if err != nil {
 					log.Error(err)
 					msg = "오류가 발생했습니다. 서버 로그을 확인하세요."
