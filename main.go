@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis/v8"
-	deliverytracker "github.com/hellodhlyn/delivery-tracker"
+	"github.com/hellodhlyn/delivery-tracker"
 	"github.com/kz/discordrus"
 	log "github.com/sirupsen/logrus"
 

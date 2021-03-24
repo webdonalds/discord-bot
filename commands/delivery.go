@@ -12,6 +12,8 @@ import (
 	"github.com/webdonalds/discord-bot/repositories"
 )
 
+const deliveryHelpMsg = "사용법: !택배 <배송사> <운송장번호>\n예시: !택배 CJ 1234567890123"
+
 type DeliveryCommand struct {
 	repo          repositories.DeliveryTrackRepository
 	trackerClient deliverytracker.Client
@@ -25,11 +27,11 @@ func (*DeliveryCommand) CommandTexts() []string {
 	return []string{"택배"}
 }
 
-func (*DeliveryCommand) ExpectedArgsLen() int {
-	return 2
-}
-
 func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate) (string, background.Watcher, error) {
+	if len(args) != 2 {
+		return deliveryHelpMsg, nil, nil
+	}
+
 	carrierName := args[0]
 	trackID := args[1]
 
