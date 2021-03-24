@@ -46,6 +46,7 @@ func main() {
 	bot.AddCommand(commands.NewHelpCommand())
 	bot.AddCommand(commands.NewTimerCommand())
 	bot.AddCommand(commands.NewExchangeCommand())
+	bot.AddCommand(commands.NewRandomCommand())
 
 	bot.AddCron(crons.NewBreakingNewsCron())
 	bot.AddCron(crons.NewDeliveryTrackCron(dtRepo, trackClient))
