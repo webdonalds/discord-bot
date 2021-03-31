@@ -63,28 +63,26 @@ func (bot *Bot) Listen() error {
 			return
 		}
 
-		splits := strings.SplitN(m.Content, " ", 2)
-		cmdText := strings.Replace(splits[0], "!", "", 1)
-
-		cmdArgs := []string{}
-		if len(splits) == 2 {
-			for _, word := range bot.cmdRegex.FindAllString(splits[1], -1) {
-				cmdArgs = append(cmdArgs, strings.ReplaceAll(strings.ReplaceAll(word, "\"", ""), "'", ""))
+		resMsg := ""
+		cmdText, cmdArgs, err := ParseCommand(m.Content)
+		if err != nil {
+			log.Error(err)
+			resMsg = "명령어 파싱에 실패했습니다."
+		} else {
+			for text, cmd := range bot.cmds {
+				if cmdText == text {
+					resMsg, _, err = cmd.Execute(cmdArgs, m)
+					if err != nil {
+						log.Error(err)
+						resMsg = "오류가 발생했습니다. 서버 로그을 확인하세요."
+					}
+					break
+				}
 			}
 		}
 
-		for text, cmd := range bot.cmds {
-			if cmdText == text {
-				msg, _, err := cmd.Execute(cmdArgs, m)
-				if err != nil {
-					log.Error(err)
-					msg = "오류가 발생했습니다. 서버 로그을 확인하세요."
-				}
-				if msg != "" {
-					_, _ = s.ChannelMessageSend(m.ChannelID, msg)
-				}
-				break
-			}
+		if resMsg != "" {
+			_, _ = s.ChannelMessageSend(m.ChannelID, resMsg)
 		}
 	})
 
