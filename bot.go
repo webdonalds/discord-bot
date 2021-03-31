@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 	"os/signal"
-	"regexp"
 	"strings"
 	"syscall"
 	"time"
@@ -17,10 +16,9 @@ import (
 )
 
 type Bot struct {
-	sess     *discordgo.Session
-	cmds     map[string]commands.Command
-	cmdRegex *regexp.Regexp
-	cron     *cron.Cron
+	sess *discordgo.Session
+	cmds map[string]commands.Command
+	cron *cron.Cron
 }
 
 func NewBot(token string) (*Bot, error) {
@@ -32,13 +30,10 @@ func NewBot(token string) (*Bot, error) {
 	loc, _ := time.LoadLocation("Asia/Seoul")
 	cron := cron.New(cron.WithLocation(loc))
 
-	cmdRegex, _ := regexp.Compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'")
-
 	return &Bot{
-		sess:     sess,
-		cmds:     map[string]commands.Command{},
-		cmdRegex: cmdRegex,
-		cron:     cron,
+		sess: sess,
+		cmds: map[string]commands.Command{},
+		cron: cron,
 	}, nil
 }
 
