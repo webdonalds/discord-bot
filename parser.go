@@ -15,25 +15,25 @@ func ParseCommand(text string) (string, []string, error) {
 
 	cmdArgs := []string{}
 	currStr := ""
-	currQuote := ""
+	currQuote := ' '
 	for _, c := range splits[1] {
-		if (c == '"' && currQuote == "\"") || (c == '\'' && currQuote == "'") || (c == ' ' && currQuote == "") {
+		if c == currQuote {
 			trimmedStr := strings.TrimSpace(currStr)
 			if trimmedStr != "" {
 				cmdArgs = append(cmdArgs, trimmedStr)
 			}
 			currStr = ""
-			currQuote = ""
+			currQuote = ' '
 		} else if c == '"' {
-			currQuote = "\""
+			currQuote = '"'
 		} else if c == '\'' {
-			currQuote = "'"
+			currQuote = '\''
 		} else {
 			currStr += string(c)
 		}
 	}
 
-	if currQuote != "" {
+	if currQuote != ' ' {
 		return "", []string{}, errors.New("unexpected end of arguments")
 	} else if trimmedStr := strings.TrimSpace(currStr); trimmedStr != "" {
 		cmdArgs = append(cmdArgs, trimmedStr)
