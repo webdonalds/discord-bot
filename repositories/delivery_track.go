@@ -15,6 +15,7 @@ type DeliveryTrack struct {
 	Mention       string     `json:"mention"`
 	CarrierID     string     `json:"carrier_id"`
 	TrackID       string     `json:"track_id"`
+	ItemName      string     `json:"item_name,omitempty"`
 	LastTimestamp *time.Time `json:"last_timestamp"`
 }
 

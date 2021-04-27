@@ -12,7 +12,7 @@ import (
 	"github.com/webdonalds/discord-bot/repositories"
 )
 
-const deliveryHelpMsg = "사용법: !택배 <배송사> <운송장번호>\n예시: !택배 CJ 1234567890123"
+const deliveryHelpMsg = "사용법: !택배 <배송사> <운송장번호>\n예시: !택배 CJ 1234567890123\n\n사용법: !택배 <배송사> <운송장번호> <물품이름>\n예시: !택배 CJ 1234567890123 한우세트"
 
 type DeliveryCommand struct {
 	repo          repositories.DeliveryTrackRepository
@@ -28,12 +28,16 @@ func (*DeliveryCommand) CommandTexts() []string {
 }
 
 func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate) (string, background.Watcher, error) {
-	if len(args) != 2 {
+	if len(args) != 2 && len(args) != 3 {
 		return deliveryHelpMsg, nil, nil
 	}
 
 	carrierName := args[0]
 	trackID := args[1]
+	var itemName string
+	if len(args) == 3 {
+		itemName = args[2]
+	}
 
 	carriers, err := cmd.trackerClient.FindCarriersByName(carrierName)
 	if len(carriers) != 1 {
@@ -58,8 +62,12 @@ func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate)
 		progress := track.Progresses[len(track.Progresses)-1]
 
 		timeAgo := int64(time.Now().Sub(*progress.Time) / time.Minute)
-		trackMsg = fmt.Sprintf(
-			"[배송 정보]\n운송장 : %s %s\n배송 현황 : %s\n현재 위치 : %s\n\n%s (업데이트 : %d분 전)\n\n",
+		trackMsg = "[배송 정보]\n"
+		if itemName != "" {
+			trackMsg += fmt.Sprintf("물품명 : %s\n", itemName)
+		}
+		trackMsg += fmt.Sprintf(
+			"운송장 : %s %s\n배송 현황 : %s\n현재 위치 : %s\n\n%s (업데이트 : %d분 전)\n\n",
 			carriers[0].Name, trackID, progress.Status.Text, progress.Location.Name, progress.Description, timeAgo,
 		)
 
@@ -68,7 +76,7 @@ func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate)
 
 	runAt := time.Now().Add(20 * time.Minute)
 	err = cmd.repo.Append(context.Background(), &repositories.DeliveryTrack{
-		Mention: msg.Author.Mention(), CarrierID: carrierID, TrackID: trackID, LastTimestamp: lastTimestamp,
+		Mention: msg.Author.Mention(), CarrierID: carrierID, TrackID: trackID, ItemName: itemName, LastTimestamp: lastTimestamp,
 	}, &runAt)
 	return fmt.Sprintf("%s배송 상태에 변경이 있을 시 20분 간격으로 알림을 발송합니다.", trackMsg), nil, err
 }
