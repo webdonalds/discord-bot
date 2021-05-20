@@ -13,4 +13,5 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.7.0
 	golang.org/x/sys v0.0.0-20201013132646-2da7054afaeb // indirect
+	golang.org/x/text v0.3.2
 )
