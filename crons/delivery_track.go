@@ -48,7 +48,11 @@ func (cron DeliveryTrackCron) Execute() string {
 			log.Errorf("failed to fetch track info (carrierID: %s, trackID: %s)\n%v", trackData.CarrierID, trackData.TrackID, err)
 			continue
 		} else if track.State != nil && track.State.ID == "delivered" {
-			msg += fmt.Sprintf("%s 배송이 완료되었습니다.\n\n", trackData.Mention)
+			if trackData.ItemName == "" {
+				msg += fmt.Sprintf("%s 배송이 완료되었습니다.\n\n", trackData.Mention)
+			} else {
+				msg += fmt.Sprintf("%s [%s] 배송이 완료되었습니다.\n\n", trackData.ItemName, trackData.Mention)
+			}
 			continue
 		}
 
@@ -65,16 +69,21 @@ func (cron DeliveryTrackCron) Execute() string {
 
 			if trackData.LastTimestamp == nil || lastProgress.Time.After(*trackData.LastTimestamp) {
 				minuteAgo := int64(time.Now().Sub(*lastProgress.Time) / time.Minute)
+
+				msg += fmt.Sprintf("%s\n[배송 정보]\n", trackData.Mention)
+				if trackData.ItemName != "" {
+					msg += fmt.Sprintf("물품명 : %s\n", trackData.ItemName)
+				}
 				msg += fmt.Sprintf(
-					"%s\n[배송 정보]\n운송장 : %s %s\n배송 현황 : %s\n현재 위치 : %s\n\n%s (업데이트 : %d분 전)\n\n",
-					trackData.Mention, track.Carrier.Name, trackData.TrackID, lastProgress.Status.Text, lastProgress.Location.Name, lastProgress.Description, minuteAgo,
+					"운송장 : %s %s\n배송 현황 : %s\n현재 위치 : %s\n\n%s (업데이트 : %d분 전)\n\n",
+					track.Carrier.Name, trackData.TrackID, lastProgress.Status.Text, lastProgress.Location.Name, lastProgress.Description, minuteAgo,
 				)
 			}
 		}
 
 		runAt := time.Now().Add(20 * time.Minute)
 		err = cron.repo.Append(context.Background(), &repositories.DeliveryTrack{
-			Mention: trackData.Mention, CarrierID: trackData.CarrierID, TrackID: trackData.TrackID, LastTimestamp: lastTimestamp,
+			Mention: trackData.Mention, CarrierID: trackData.CarrierID, TrackID: trackData.TrackID, ItemName: trackData.ItemName, LastTimestamp: lastTimestamp,
 		}, &runAt)
 		if err != nil {
 			log.Errorf("failed to append track data: %v", err)
