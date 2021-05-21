@@ -51,7 +51,7 @@ func (cron DeliveryTrackCron) Execute() string {
 			if trackData.ItemName == "" {
 				msg += fmt.Sprintf("%s 배송이 완료되었습니다.\n\n", trackData.Mention)
 			} else {
-				msg += fmt.Sprintf("%s [%s] 배송이 완료되었습니다.\n\n", trackData.ItemName, trackData.Mention)
+				msg += fmt.Sprintf("%s [%s] 배송이 완료되었습니다.\n\n", trackData.Mention, trackData.ItemName)
 			}
 			continue
 		}
