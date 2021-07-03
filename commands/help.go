@@ -3,7 +3,6 @@ package commands
 import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/webdonalds/discord-bot/responses"
-	"github.com/webdonalds/discord-bot/utils"
 
 	"github.com/webdonalds/discord-bot/background"
 )
@@ -19,7 +18,7 @@ func (*HelpCommand) CommandTexts() []string {
 }
 
 func (*HelpCommand) Execute(_ []string, _ *discordgo.MessageCreate) (responses.ResponseMessage, background.Watcher, error) {
-	e := utils.NewEmbed().
+	e := responses.NewEmbed().
 		SetTitle("Webdo Bot Help").
 		SetDescription("`!help` 또는 `!도움`을 입력").
 		AddField("미세먼지", "`!미세먼지`").

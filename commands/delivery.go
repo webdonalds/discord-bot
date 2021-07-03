@@ -44,13 +44,13 @@ func (cmd *DeliveryCommand) Execute(args []string, msg *discordgo.MessageCreate)
 	if len(carriers) != 1 {
 		return responses.NewTextMessage("해당하는 이름의 택배사를 찾을 수 없습니다."), nil, nil
 	} else if err != nil {
-		return responses.NewTextMessage(""), nil, err
+		return nil, nil, err
 	}
 
 	carrierID := carriers[0].ID
 	track, err := cmd.trackerClient.GetTrack(carrierID, trackID)
 	if err != nil {
-		return responses.NewTextMessage(""), nil, err
+		return nil, nil, err
 	} else if track == nil {
 		return responses.NewTextMessage("올바르지 않은 운송장이거나, 택배사에서 아직 물건을 인수하지 않았습니다."), nil, nil
 	} else if track.State != nil && track.State.ID == "delivered" {

@@ -31,7 +31,7 @@ func (c *AirQualityCommand) CommandTexts() []string {
 func (c *AirQualityCommand) Execute(_ []string, _ *discordgo.MessageCreate) (responses.ResponseMessage, background.Watcher, error) {
 	res, err := c.waqiClient.GetCityFeed(context.Background(), "seoul")
 	if err != nil {
-		return responses.NewTextMessage(""), nil, err
+		return nil, nil, err
 	}
 
 	pm10 := res.Data.IAQI.PM10.V

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/webdonalds/discord-bot/responses"
 	"os"
 	"os/signal"
 	"strings"
@@ -14,6 +13,7 @@ import (
 
 	"github.com/webdonalds/discord-bot/commands"
 	"github.com/webdonalds/discord-bot/crons"
+	"github.com/webdonalds/discord-bot/responses"
 )
 
 type Bot struct {
@@ -63,14 +63,14 @@ func (bot *Bot) Listen() error {
 		cmdText, cmdArgs, err := ParseCommand(m.Content)
 		if err != nil {
 			log.Error(err)
-			_, _ = s.ChannelMessageSend(m.ChannelID, "명령어 파싱에 실패했습니다.")
+			res = responses.NewTextMessage("명령어 파싱에 실패했습니다.")
 		} else {
 			for text, cmd := range bot.cmds {
 				if cmdText == text {
 					res, _, err = cmd.Execute(cmdArgs, m)
 					if err != nil {
 						log.Error(err)
-						_, _ = s.ChannelMessageSend(m.ChannelID, "오류가 발생했습니다. 서버 로그을 확인하세요.")
+						res = responses.NewTextMessage("오류가 발생했습니다. 서버 로그을 확인하세요.")
 					}
 					break
 				}
