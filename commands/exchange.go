@@ -3,6 +3,7 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/webdonalds/discord-bot/responses"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -47,10 +48,10 @@ func (*ExchangeCommand) CommandTexts() []string {
 	return []string{"환율"}
 }
 
-func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
+func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (responses.ResponseMessage, background.Watcher, error) {
 	// 예외 처리
 	if len(args) != 2 {
-		return exchageHelpMsg, nil, nil
+		return responses.NewTextMessage(exchageHelpMsg), nil, nil
 	}
 
 	//통화쌍
@@ -58,13 +59,13 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 	orig_price := args[1]
 
 	if strings.Contains(availableList, currencyPair) == false {
-		return "지원하지 않는 국가 코드입니다.", nil, nil
+		return responses.NewTextMessage("지원하지 않는 국가 코드입니다."), nil, nil
 	}
 
 	targetPrice, parseErr := strconv.ParseFloat(args[1], 64) // 환율 적용 하고 싶은 액수
 
 	if parseErr != nil {
-		return "금액은 숫자로만 적어주세요.", nil, nil
+		return responses.NewTextMessage("금액은 숫자로만 적어주세요."), nil, nil
 	}
 
 	// API 읽어오기
@@ -73,7 +74,7 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 	req, err := http.Get(url)
 
 	if err != nil {
-		return "환율 API 에러: ", nil, err
+		return responses.NewTextMessage("환율 API 에러: "), nil, err
 	}
 
 	defer req.Body.Close()
@@ -81,7 +82,7 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 	data, err := ioutil.ReadAll(req.Body)
 
 	if err != nil {
-		return "환율 API Read 에러", nil, err
+		return responses.NewTextMessage("환율 API Read 에러"), nil, err
 	}
 
 	// Json 파싱
@@ -89,7 +90,7 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 	jsonErr := json.Unmarshal([]byte(data), &res)
 
 	if jsonErr != nil {
-		return "환율 json 처리 에러", nil, jsonErr
+		return responses.NewTextMessage("환율 json 처리 에러"), nil, jsonErr
 	}
 	exchangeData := res[currencyPair].([]interface{})
 
@@ -110,5 +111,5 @@ func (*ExchangeCommand) Execute(args []string, _ *discordgo.MessageCreate) (stri
 		orig, price, target,
 		change, target, changePercent)
 
-	return msg, nil, nil
+	return responses.NewTextMessage(msg), nil, nil
 }

@@ -2,6 +2,7 @@ package commands
 
 import (
 	"context"
+	"github.com/webdonalds/discord-bot/responses"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"math"
@@ -28,9 +29,9 @@ func (*StockCommand) CommandTexts() []string {
 	return []string{"주가"}
 }
 
-func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
+func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (responses.ResponseMessage, background.Watcher, error) {
 	if len(args) != 1 {
-		return "종목명을 입력하세요.", nil, nil
+		return responses.NewTextMessage("종목명을 입력하세요."), nil, nil
 	}
 
 	stockName := args[0]
@@ -42,11 +43,11 @@ func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (strin
 		return
 	}); err != nil {
 		log.Errorf("failed to search asset\n%v", err)
-		return "종목 정보 검색에 실패했습니다.", nil, nil
+		return responses.NewTextMessage("종목 정보 검색에 실패했습니다."), nil, nil
 	}
 
 	if len(searchResult.Assets) == 0 {
-		return "해당하는 종목을 찾을 수 없습니다.", nil, nil
+		return responses.NewTextMessage("해당하는 종목을 찾을 수 없습니다."), nil, nil
 	}
 
 	var securityResult *stock.GetRecentSecuritiesResponse
@@ -55,7 +56,7 @@ func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (strin
 		return
 	}); err != nil {
 		log.Errorf("failed to get recent security\n%v", err)
-		return "종목 정보 조회에 실패했습니다.", nil, nil
+		return responses.NewTextMessage("종목 정보 조회에 실패했습니다."), nil, nil
 	}
 
 	security := securityResult.RecentSecurities[0]
@@ -71,5 +72,5 @@ func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (strin
 		security.Name, security.ShortCode, security.TradePrice,
 		upOrDown, math.Abs(security.ChangePrice), security.ChangePriceRate*100,
 	)
-	return msg, nil, nil
+	return responses.NewTextMessage(msg), nil, nil
 }

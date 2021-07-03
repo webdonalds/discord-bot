@@ -3,6 +3,7 @@ package commands
 import (
 	"context"
 	"fmt"
+	"github.com/webdonalds/discord-bot/responses"
 	"os"
 
 	"github.com/bwmarrin/discordgo"
@@ -27,10 +28,10 @@ func (c *AirQualityCommand) CommandTexts() []string {
 	return []string{"미세먼지"}
 }
 
-func (c *AirQualityCommand) Execute(_ []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
+func (c *AirQualityCommand) Execute(_ []string, _ *discordgo.MessageCreate) (responses.ResponseMessage, background.Watcher, error) {
 	res, err := c.waqiClient.GetCityFeed(context.Background(), "seoul")
 	if err != nil {
-		return "", nil, err
+		return responses.NewTextMessage(""), nil, err
 	}
 
 	pm10 := res.Data.IAQI.PM10.V
@@ -57,5 +58,7 @@ func (c *AirQualityCommand) Execute(_ []string, _ *discordgo.MessageCreate) (str
 		pm25Label = "최악"
 	}
 
-	return fmt.Sprintf("현재 서울의 대기 정보\n미세먼지 : %d (%s)\n초미세먼지 : %d (%s)", pm10, pm10Label, pm25, pm25Label), nil, nil
+	msg := fmt.Sprintf("현재 서울의 대기 정보\n미세먼지 : %d (%s)\n초미세먼지 : %d (%s)", pm10, pm10Label, pm25, pm25Label)
+
+	return responses.NewTextMessage(msg), nil, nil
 }
