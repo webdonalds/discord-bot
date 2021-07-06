@@ -37,7 +37,7 @@ USDAUD USDBRL USDCAD USDCHF USDCNY USDEUR USDGBP USDHKD USDINR USDJPY USDKRW USD
 VNDCNY VNDEUR VNDGBP VNDJPY VNDKRW VNDUSD
 `
 
-const api = "https://earthquake.kr:23490/query/" // 참고: https://jaeheon.kr/12
+const api = "https://exchange.jaeheon.kr:23490/query/" // 참고: https://jaeheon.kr/12
 
 func NewExchangeCommand() Command {
 	return &ExchangeCommand{}
