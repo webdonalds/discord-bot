@@ -46,7 +46,7 @@ func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (strin
 		}
 	}
 
-	return strings.Join(msgs, "\n"), nil, nil
+	return strings.Join(msgs, "\n\n"), nil, nil
 }
 
 func (c *StockCommand) executeEach(ctx context.Context, stockName string) (string, error) {
@@ -79,8 +79,13 @@ func (c *StockCommand) executeEach(ctx context.Context, stockName string) (strin
 	}
 
 	p := message.NewPrinter(language.English)
-	return p.Sprintf("**%s**(%s) %.0f / %s%.0f (%.2f%%)",
-		security.Name, security.ShortCode, security.TradePrice,
-		upOrDown, math.Abs(security.ChangePrice), security.ChangePriceRate*100,
-	), nil
+	return strings.Join([]string{
+		p.Sprintf(
+			"**%s**(%s) %.0f / %s%.0f (%.2f%%)",
+			security.Name, security.ShortCode, security.TradePrice,
+			upOrDown, math.Abs(security.ChangePrice), security.ChangePriceRate*100,
+		),
+		p.Sprintf("S: %.0f / H: %.0f / L: %.0f", security.OpeningPrice, security.HighPrice, security.LowPrice),
+		p.Sprintf("https://ssl.pstatic.net/imgfinance/chart/item/candle/day/%s.png", searchResult.Assets[0].DisplayedCode),
+	}, "\n"), nil
 }
