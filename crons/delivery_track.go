@@ -47,13 +47,6 @@ func (cron DeliveryTrackCron) Execute() string {
 		if err != nil {
 			log.Errorf("failed to fetch track info (carrierID: %s, trackID: %s)\n%v", trackData.CarrierID, trackData.TrackID, err)
 			continue
-		} else if track.State != nil && track.State.ID == "delivered" {
-			if trackData.ItemName == "" {
-				msg += fmt.Sprintf("%s 배송이 완료되었습니다.\n\n", trackData.Mention)
-			} else {
-				msg += fmt.Sprintf("%s [%s] 배송이 완료되었습니다.\n\n", trackData.Mention, trackData.ItemName)
-			}
-			continue
 		}
 
 		var lastTimestamp *time.Time
@@ -66,6 +59,16 @@ func (cron DeliveryTrackCron) Execute() string {
 				}
 			}
 			lastTimestamp = lastProgress.Time
+
+			// 배송 완료인 경우
+			if lastProgress.Status.ID == "delivered" {
+				if trackData.ItemName == "" {
+					msg += fmt.Sprintf("%s 배송이 완료되었습니다.\n\n", trackData.Mention)
+				} else {
+					msg += fmt.Sprintf("%s [%s] 배송이 완료되었습니다.\n\n", trackData.Mention, trackData.ItemName)
+				}
+				continue
+			}
 
 			if trackData.LastTimestamp == nil || lastProgress.Time.After(*trackData.LastTimestamp) {
 				minuteAgo := int64(time.Now().Sub(*lastProgress.Time) / time.Minute)
