@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -43,19 +44,61 @@ func NewRedisMolluRepository(rdb *redis.Client) (MolluRepository, error) {
 	return repo, nil
 }
 
-// TODO
 func (repo *RedisMolluRepository) GetByID(ctx context.Context, id string) (MolluInfo, error) {
-	return MolluInfo{}, nil
+	infoList, err := repo.ListAll(ctx)
+	if err != nil {
+		return MolluInfo{}, err
+	}
+
+	for _, info := range infoList {
+		if info.ID == id {
+			return info, nil
+		}
+	}
+	return MolluInfo{}, MolluNotFound
 }
 
 func (repo *RedisMolluRepository) ListAll(ctx context.Context) ([]MolluInfo, error) {
-	return nil, nil
+	infoListJson, err := repo.rdb.Get(ctx, molluInfoListKey).Result()
+	if err == redis.Nil {
+		return []MolluInfo{}, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	var infoList []MolluInfo
+	err = json.Unmarshal([]byte(infoListJson), &infoList)
+	if err != nil {
+		return nil, err
+	}
+	return infoList, nil
 }
 
 func (repo *RedisMolluRepository) Save(ctx context.Context, molluInfo MolluInfo) error {
-	return nil
+	infoList, err := repo.ListAll(ctx)
+	if err != nil {
+		return err
+	}
+
+	changed := false
+	for i, info := range infoList {
+		if info.ID == molluInfo.ID {
+			infoList[i] = molluInfo
+			changed = true
+			break
+		}
+	}
+	if !changed {
+		infoList = append(infoList, molluInfo)
+	}
+	return repo.SaveAll(ctx, infoList)
 }
 
 func (repo *RedisMolluRepository) SaveAll(ctx context.Context, molluInfoList []MolluInfo) error {
-	return nil
+	infoListJson, err := json.Marshal(molluInfoList)
+	if err != nil {
+		return err
+	}
+
+	return repo.rdb.Set(ctx, molluInfoListKey, string(infoListJson), -1).Err()
 }
