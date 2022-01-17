@@ -55,6 +55,7 @@ func main() {
 	bot.AddCron(crons.NewBreakingNewsCron())
 	bot.AddCron(crons.NewDeliveryTrackCron(dtRepo, trackClient))
 	bot.AddCron(crons.NewDevArticleCron(daRepo))
+	bot.AddCron(crons.NewMolluCron(molluRepo))
 
 	err = bot.Listen()
 	if err != nil {
