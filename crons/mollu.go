@@ -2,6 +2,7 @@ package crons
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -45,6 +46,10 @@ func (cron MolluCron) Execute() string {
 		info.IsNotified = true
 		info.CafeLastVisit = &currentTime
 		molluInfoList[i] = info
+		if len(msg) != 0 {
+			msg += "\n\n"
+		}
+		msg += fmt.Sprintf("%s 선생님 카페 방문 하실 시간입니다.", info.ID)
 	}
 
 	err = cron.repo.SaveAll(ctx, molluInfoList)
