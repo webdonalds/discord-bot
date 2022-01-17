@@ -78,6 +78,7 @@ func (cmd *MolluCommand) handleCafeCommand(ctx context.Context, info repositorie
 
 	currentTime := time.Now()
 	info.CafeLastVisit = &currentTime
+	info.IsNotified = false
 	err := cmd.repo.Save(ctx, info)
 	if err != nil {
 		return ""

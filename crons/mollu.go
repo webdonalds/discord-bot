@@ -44,7 +44,6 @@ func (cron MolluCron) Execute() string {
 		}
 
 		info.IsNotified = true
-		info.CafeLastVisit = &currentTime
 		molluInfoList[i] = info
 		if len(msg) != 0 {
 			msg += "\n\n"
@@ -60,19 +59,20 @@ func (cron MolluCron) Execute() string {
 	return msg
 }
 
+// 3시간 마다 가는 알림은 notify가 된적이 없는 경우에만 발송
+// 12시간마다 초기화 되는 알림은 notify 여부 관계 없이 발송
 func (cron MolluCron) isCafeInitialized(info repositories.MolluInfo, currentTime time.Time) bool {
 	if info.CafeLastVisit == nil {
 		return false
 	}
 
 	prevTime := *info.CafeLastVisit
-	if currentTime.After(prevTime.Add(time.Hour * 3)) {
+	if currentTime.After(prevTime.Add(time.Hour*3)) && !info.IsNotified {
 		return true
 	}
 
-	// 4시간씩 빼서 초기화 시간을 0~12시, 12시~24시로 생각합니다.
-	// 이미 위의 if문 때문에 두 시간 사이는 3시간 이하입니다.
-	// 초기화 될 수 없는 조건은 두 시간 모두 0~12시에 있거나 모두 12~24시에 있는 경우입니다.
+	// 12시간마다 초기화 되는 알림은 4시간씩 빼서 초기화 시간을 0~12시, 12시~24시로 생각합니다.
+	// 초기화 될 수 없는 조건은 같은 날이면서 두 시간 모두 0~12시에 있거나 모두 12~24시에 있는 경우입니다.
 	t1 := prevTime.Add(time.Hour * -4)
 	t2 := currentTime.Add(time.Hour * -4)
 	return !(isSameDay(t1, t2) && (t2.Hour() < 12 || t1.Hour() >= 12))
