@@ -12,6 +12,11 @@
 - 환율 조회
     - !환율 <통화쌍> <액수> (예> !환율 USDKRW 4)
     - [사용 가능한 통화쌍](#환율-조회-사용-가능한-통화쌍)
+- 블루 아카이브
+    - !몰루 카페
+    - !몰루 카페 출석
+    - !몰루 알림
+    - !몰루 알림 <on/off> (예> !몰루 알림 on)
        
 
 ## 개발
@@ -25,7 +30,8 @@
 - `DISCORD_BOT_TOKEN` (required)
 - `ERROR_LOG_WEBHOOK_URL`
 - `BOT_CHANNEL_ID`
-- `BREAKING_NEW_CHANNEL_ID`
+- `BREAKING_NEWS_CHANNEL_ID`
+- `MOLLU_CHANNEL_ID`
 - `DEV_ARTICLE_CHANNEL_ID`
 - `TWITTER_CONSUMER_KEY`
 - `TWITTER_CONSUMER_SECRET`
