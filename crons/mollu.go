@@ -39,11 +39,11 @@ func (cron MolluCron) Execute() string {
 	msg := ""
 	currentTime := time.Now()
 	for i, info := range molluInfoList {
-		if !info.NotifySetting || !cron.isCafeInitialized(info, currentTime) {
+		if !info.NotifySetting || !shouldNotify(info, currentTime) {
 			continue
 		}
 
-		info.IsNotified = true
+		info.LastNotify = &currentTime
 		molluInfoList[i] = info
 		if len(msg) != 0 {
 			msg += "\n\n"
@@ -51,30 +51,37 @@ func (cron MolluCron) Execute() string {
 		msg += fmt.Sprintf("%s 선생님 카페 방문 하실 시간입니다.", info.ID)
 	}
 
-	err = cron.repo.SaveAll(ctx, molluInfoList)
-	if err != nil {
-		log.Errorf("failed to save mollu info list")
-		return ""
+	if len(msg) != 0 {
+		err = cron.repo.SaveAll(ctx, molluInfoList)
+		if err != nil {
+			log.Errorf("failed to save mollu info list")
+			return ""
+		}
 	}
 	return msg
 }
 
-// 3시간 마다 가는 알림은 notify가 된적이 없는 경우에만 발송
-// 12시간마다 초기화 되는 알림은 notify 여부 관계 없이 발송
-func (cron MolluCron) isCafeInitialized(info repositories.MolluInfo, currentTime time.Time) bool {
+// 알람을 받은 이후에 12시간 초기화가 되지 않았다면 3시간 뒤에 한번 발송
+// 12시간마다 초기화 되는 알림은 항상 한번 발송
+func shouldNotify(info repositories.MolluInfo, currentTime time.Time) bool {
 	if info.CafeLastVisit == nil {
 		return false
 	}
 
-	prevTime := *info.CafeLastVisit
-	if currentTime.After(prevTime.Add(time.Hour*3)) && !info.IsNotified {
+	if !isSameInterval(*info.LastNotify, currentTime) {
 		return true
 	}
+	return info.LastNotify.Before(*info.CafeLastVisit) && info.CafeLastVisit.Before(currentTime.Add(time.Hour*-3))
+}
 
-	// 12시간마다 초기화 되는 알림은 4시간씩 빼서 초기화 시간을 0~12시, 12시~24시로 생각합니다.
-	// 초기화 될 수 없는 조건은 같은 날이면서 두 시간 모두 0~12시에 있거나 모두 12~24시에 있는 경우입니다.
-	t1 := prevTime.Add(time.Hour * -4)
-	t2 := currentTime.Add(time.Hour * -4)
+// 4시간씩 빼서 초기화 시간을 0:00~11:59, 12:00~23:59로 생각합니다.
+func isSameInterval(t1, t2 time.Time) bool {
+	if t1.After(t2) {
+		t1, t2 = t2, t1
+	}
+
+	t1 = t1.Add(time.Hour * -4)
+	t2 = t2.Add(time.Hour * -4)
 	return !(isSameDay(t1, t2) && (t2.Hour() < 12 || t1.Hour() >= 12))
 }
 

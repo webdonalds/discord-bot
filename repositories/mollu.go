@@ -24,7 +24,7 @@ type MolluInfo struct {
 	ID            string     `json:"id"`
 	NotifySetting bool       `json:"notify_setting"`
 	CafeLastVisit *time.Time `json:"cafe_last_visit"`
-	IsNotified    bool       `json:"is_notified"`
+	LastNotify    *time.Time `json:"last_notify"`
 }
 
 type MolluRepository interface {

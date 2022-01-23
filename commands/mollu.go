@@ -42,7 +42,7 @@ func (cmd *MolluCommand) Execute(args []string, msg *discordgo.MessageCreate) (s
 			ID:            msg.Author.Mention(),
 			NotifySetting: false,
 			CafeLastVisit: nil,
-			IsNotified:    false,
+			LastNotify:    nil,
 		}
 	} else if err != nil {
 		return "", nil, err
@@ -78,7 +78,7 @@ func (cmd *MolluCommand) handleCafeCommand(ctx context.Context, info repositorie
 
 	currentTime := time.Now()
 	info.CafeLastVisit = &currentTime
-	info.IsNotified = false
+	info.LastNotify = nil
 	err := cmd.repo.Save(ctx, info)
 	if err != nil {
 		return ""
