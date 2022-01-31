@@ -68,10 +68,10 @@ func shouldNotify(info repositories.MolluInfo, currentTime time.Time) bool {
 		return false
 	}
 
-	if info.LastNotify == nil {
-		return info.CafeLastVisit.Before(currentTime.Add(time.Hour*-3))
+	if !isSameInterval(*info.LastNotify, currentTime) {
+		return true
 	}
-	return !isSameInterval(*info.LastNotify, currentTime)
+	return info.LastNotify == nil && info.CafeLastVisit.Before(currentTime.Add(time.Hour*-3))
 }
 
 // 4시간씩 빼서 초기화 시간을 0:00~11:59, 12:00~23:59로 생각합니다.
