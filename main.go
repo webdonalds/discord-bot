@@ -39,6 +39,7 @@ func main() {
 	// Initialize repositories
 	dtRepo, _ := repositories.NewRedisDeliveryTrackRepository(rdb)
 	daRepo, _ := repositories.NewRedisDevArticleRepository(rdb)
+	molluRepo, _ := repositories.NewRedisMolluRepository(rdb)
 
 	// Register commands and crons
 	bot.AddCommand(commands.NewPingCommand())
@@ -49,10 +50,12 @@ func main() {
 	bot.AddCommand(commands.NewRandomCommand())
 	bot.AddCommand(commands.NewAirQualityCommand())
 	bot.AddCommand(commands.NewStockCommand())
+	bot.AddCommand(commands.NewMolluCommand(molluRepo))
 
 	bot.AddCron(crons.NewBreakingNewsCron())
 	bot.AddCron(crons.NewDeliveryTrackCron(dtRepo, trackClient))
 	bot.AddCron(crons.NewDevArticleCron(daRepo))
+	bot.AddCron(crons.NewMolluCron(molluRepo))
 
 	err = bot.Listen()
 	if err != nil {
