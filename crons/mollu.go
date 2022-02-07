@@ -82,9 +82,9 @@ func isSameInterval(t1, t2 time.Time) bool {
 
 	t1 = t1.Add(time.Hour * -4)
 	t2 = t2.Add(time.Hour * -4)
-	return isSameDay(t1, t2) && (t2.Hour() < 12 || t1.Hour() >= 12)
+	return isSameDate(t1, t2) && (t2.Hour() < 12 || t1.Hour() >= 12)
 }
 
-func isSameDay(t1, t2 time.Time) bool {
+func isSameDate(t1, t2 time.Time) bool {
 	return t1.Year() == t2.Year() && t1.Month() == t2.Month() && t1.Day() == t2.Day()
 }
