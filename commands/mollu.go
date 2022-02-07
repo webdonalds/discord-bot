@@ -38,7 +38,7 @@ func (cmd *MolluCommand) Execute(args []string, msg *discordgo.MessageCreate) (s
 	ctx := context.Background()
 	info, err := cmd.repo.GetByID(ctx, msg.Author.Mention())
 	if err == repositories.MolluNotFound {
-		info = repositories.MolluInfo{
+		info = &repositories.MolluInfo{
 			ID:            msg.Author.Mention(),
 			NotifySetting: false,
 			CafeLastVisit: nil,
@@ -69,7 +69,7 @@ func (cmd *MolluCommand) isValidArgs(args []string) bool {
 	return args[0] == "알림" && (len(args) == 1 || args[1] == notifySettingOn || args[1] == notifySettingOff)
 }
 
-func (cmd *MolluCommand) handleCafeCommand(ctx context.Context, info repositories.MolluInfo, args []string) (string, error) {
+func (cmd *MolluCommand) handleCafeCommand(ctx context.Context, info *repositories.MolluInfo, args []string) (string, error) {
 	if len(args) == 0 {
 		if info.CafeLastVisit == nil {
 			return "카페에 출석한 기록이 없습니다.", nil
@@ -88,7 +88,7 @@ func (cmd *MolluCommand) handleCafeCommand(ctx context.Context, info repositorie
 	return "정상적으로 출석처리 되었습니다.", nil
 }
 
-func (cmd *MolluCommand) handleNotifyCommand(ctx context.Context, info repositories.MolluInfo, args []string) (string, error) {
+func (cmd *MolluCommand) handleNotifyCommand(ctx context.Context, info *repositories.MolluInfo, args []string) (string, error) {
 	reply := ""
 	if len(args) != 0 {
 		info.NotifySetting = (args[0] == notifySettingOn)

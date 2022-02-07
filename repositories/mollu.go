@@ -28,9 +28,9 @@ type MolluInfo struct {
 }
 
 type MolluRepository interface {
-	GetByID(ctx context.Context, id string) (MolluInfo, error)
+	GetByID(ctx context.Context, id string) (*MolluInfo, error)
 	ListAll(ctx context.Context) ([]MolluInfo, error)
-	Save(ctx context.Context, molluInfo MolluInfo) error
+	Save(ctx context.Context, molluInfo *MolluInfo) error
 	SaveAll(ctx context.Context, molluInfoList []MolluInfo) error
 }
 
@@ -44,18 +44,18 @@ func NewRedisMolluRepository(rdb *redis.Client) (MolluRepository, error) {
 	return repo, nil
 }
 
-func (repo *RedisMolluRepository) GetByID(ctx context.Context, id string) (MolluInfo, error) {
+func (repo *RedisMolluRepository) GetByID(ctx context.Context, id string) (*MolluInfo, error) {
 	infoList, err := repo.ListAll(ctx)
 	if err != nil {
-		return MolluInfo{}, err
+		return &MolluInfo{}, err
 	}
 
 	for _, info := range infoList {
 		if info.ID == id {
-			return info, nil
+			return &info, nil
 		}
 	}
-	return MolluInfo{}, MolluNotFound
+	return &MolluInfo{}, MolluNotFound
 }
 
 func (repo *RedisMolluRepository) ListAll(ctx context.Context) ([]MolluInfo, error) {
@@ -74,7 +74,7 @@ func (repo *RedisMolluRepository) ListAll(ctx context.Context) ([]MolluInfo, err
 	return infoList, nil
 }
 
-func (repo *RedisMolluRepository) Save(ctx context.Context, molluInfo MolluInfo) error {
+func (repo *RedisMolluRepository) Save(ctx context.Context, molluInfo *MolluInfo) error {
 	infoList, err := repo.ListAll(ctx)
 	if err != nil {
 		return err
@@ -83,13 +83,13 @@ func (repo *RedisMolluRepository) Save(ctx context.Context, molluInfo MolluInfo)
 	changed := false
 	for i, info := range infoList {
 		if info.ID == molluInfo.ID {
-			infoList[i] = molluInfo
+			infoList[i] = *molluInfo
 			changed = true
 			break
 		}
 	}
 	if !changed {
-		infoList = append(infoList, molluInfo)
+		infoList = append(infoList, *molluInfo)
 	}
 	return repo.SaveAll(ctx, infoList)
 }
