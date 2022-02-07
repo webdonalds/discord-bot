@@ -2,9 +2,11 @@ package commands
 
 import (
 	"context"
+	"errors"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 	"math"
+	"strings"
 
 	"github.com/avast/retry-go"
 	"github.com/bwmarrin/discordgo"
@@ -29,24 +31,35 @@ func (*StockCommand) CommandTexts() []string {
 }
 
 func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (string, background.Watcher, error) {
-	if len(args) != 1 {
-		return "종목명을 입력하세요.", nil, nil
+	if len(args) == 0 {
+		return "종목명을 1개 이상 입력하세요.", nil, nil
 	}
 
-	stockName := args[0]
 	ctx := context.Background()
+	msgs := []string{}
+	for _, arg := range args {
+		eachMsg, err := c.executeEach(ctx, arg)
+		if err != nil {
+			log.Errorf("failed to get recent security\n%v", err)
+		} else {
+			msgs = append(msgs, eachMsg)
+		}
+	}
 
+	return strings.Join(msgs, "\n\n"), nil, nil
+}
+
+func (c *StockCommand) executeEach(ctx context.Context, stockName string) (string, error) {
 	var searchResult *stock.GetSearchResponse
 	if err := retry.Do(func() (err error) {
 		searchResult, err = c.stockClient.GetSearch(ctx, stockName)
 		return
 	}); err != nil {
-		log.Errorf("failed to search asset\n%v", err)
-		return "종목 정보 검색에 실패했습니다.", nil, nil
+		return "", err
 	}
 
 	if len(searchResult.Assets) == 0 {
-		return "해당하는 종목을 찾을 수 없습니다.", nil, nil
+		return "", errors.New("해당하는 종목을 찾을 수 없습니다")
 	}
 
 	var securityResult *stock.GetRecentSecuritiesResponse
@@ -54,8 +67,7 @@ func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (strin
 		securityResult, err = c.stockClient.GetRecentSecurities(ctx, []string{searchResult.Assets[0].AssetID})
 		return
 	}); err != nil {
-		log.Errorf("failed to get recent security\n%v", err)
-		return "종목 정보 조회에 실패했습니다.", nil, nil
+		return "", err
 	}
 
 	security := securityResult.RecentSecurities[0]
@@ -67,9 +79,13 @@ func (c *StockCommand) Execute(args []string, _ *discordgo.MessageCreate) (strin
 	}
 
 	p := message.NewPrinter(language.English)
-	msg := p.Sprintf("**%s**(%s) %.0f / %s%.0f (%.2f%%)",
-		security.Name, security.ShortCode, security.TradePrice,
-		upOrDown, math.Abs(security.ChangePrice), security.ChangePriceRate*100,
-	)
-	return msg, nil, nil
+	return strings.Join([]string{
+		p.Sprintf(
+			"**%s**(%s) %.0f / %s%.0f (%.2f%%)",
+			security.Name, security.ShortCode, security.TradePrice,
+			upOrDown, math.Abs(security.ChangePrice), security.ChangePriceRate*100,
+		),
+		p.Sprintf("S: %.0f / H: %.0f / L: %.0f", security.OpeningPrice, security.HighPrice, security.LowPrice),
+		p.Sprintf("https://ssl.pstatic.net/imgfinance/chart/item/candle/day/%s.png", searchResult.Assets[0].DisplayedCode),
+	}, "\n"), nil
 }
