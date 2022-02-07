@@ -49,9 +49,11 @@ func (cmd *MolluCommand) Execute(args []string, msg *discordgo.MessageCreate) (s
 	}
 
 	if args[0] == "카페" {
-		return cmd.handleCafeCommand(ctx, info, args[1:]), nil, nil
+		msg, err := cmd.handleCafeCommand(ctx, info, args[1:])
+		return msg, nil, err
 	} else if args[0] == "알림" {
-		return cmd.handleNotifyCommand(ctx, info, args[1:]), nil, nil
+		msg, err := cmd.handleNotifyCommand(ctx, info, args[1:])
+		return msg, nil, err
 	}
 	return helpMsg, nil, nil
 }
@@ -67,12 +69,12 @@ func (cmd *MolluCommand) isValidArgs(args []string) bool {
 	return args[0] == "알림" && (len(args) == 1 || args[1] == notifySettingOn || args[1] == notifySettingOff)
 }
 
-func (cmd *MolluCommand) handleCafeCommand(ctx context.Context, info repositories.MolluInfo, args []string) string {
+func (cmd *MolluCommand) handleCafeCommand(ctx context.Context, info repositories.MolluInfo, args []string) (string, error) {
 	if len(args) == 0 {
 		if info.CafeLastVisit == nil {
-			return "카페에 출석한 기록이 없습니다."
+			return "카페에 출석한 기록이 없습니다.", nil
 		} else {
-			return fmt.Sprintf("최근 카페 출석 시각: %s", info.CafeLastVisit.Format("2006-01-02 15:04:05"))
+			return fmt.Sprintf("최근 카페 출석 시각: %s", info.CafeLastVisit.Format("2006-01-02 15:04:05")), nil
 		}
 	}
 
@@ -81,18 +83,18 @@ func (cmd *MolluCommand) handleCafeCommand(ctx context.Context, info repositorie
 	info.LastNotify = nil
 	err := cmd.repo.Save(ctx, info)
 	if err != nil {
-		return ""
+		return "", err
 	}
-	return "정상적으로 출석처리 되었습니다."
+	return "정상적으로 출석처리 되었습니다.", nil
 }
 
-func (cmd *MolluCommand) handleNotifyCommand(ctx context.Context, info repositories.MolluInfo, args []string) string {
+func (cmd *MolluCommand) handleNotifyCommand(ctx context.Context, info repositories.MolluInfo, args []string) (string, error) {
 	reply := ""
 	if len(args) != 0 {
 		info.NotifySetting = (args[0] == notifySettingOn)
 		err := cmd.repo.Save(ctx, info)
 		if err != nil {
-			return ""
+			return "", err
 		}
 
 		reply = "정상적으로 설정되었습니다.\n\n"
@@ -106,5 +108,5 @@ func (cmd *MolluCommand) handleNotifyCommand(ctx context.Context, info repositor
 	}
 	reply += "현재 알림 상태: " + notifySettingStr
 
-	return reply
+	return reply, nil
 }
