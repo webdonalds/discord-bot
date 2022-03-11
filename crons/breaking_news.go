@@ -2,6 +2,7 @@ package crons
 
 import (
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/avast/retry-go"
@@ -64,10 +65,11 @@ func (cron *BreakingNewsCron) Execute() string {
 		log.Infof("polled %d tweets, last tweet id: %d", len(tweets), cron.lastTweetID)
 	}
 
-	texts := []string{}
+	var texts []string
+	var linkRegex = regexp.MustCompile(`https://[\s\S]+$`)
 	for _, tweet := range tweets {
 		if strings.Contains(tweet.Text, "속보") || strings.Contains(tweet.Text, "1보") {
-			texts = append(texts, tweet.Text)
+			texts = append(texts, linkRegex.ReplaceAllString(tweet.Text, "${1}"))
 		}
 	}
 
