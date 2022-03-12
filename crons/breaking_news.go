@@ -66,10 +66,10 @@ func (cron *BreakingNewsCron) Execute() string {
 	}
 
 	var texts []string
-	var linkRegex = regexp.MustCompile(`https://[\s\S]+$`)
+	linkRegex := regexp.MustCompile(`https://[\s\S]+$`)
 	for _, tweet := range tweets {
 		if strings.Contains(tweet.Text, "속보") || strings.Contains(tweet.Text, "1보") {
-			texts = append(texts, linkRegex.ReplaceAllString(tweet.Text, "${1}"))
+			texts = append(texts, linkRegex.ReplaceAllString(tweet.Text, "<${0}>"))
 		}
 	}
 
