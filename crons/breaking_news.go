@@ -1,6 +1,7 @@
 package crons
 
 import (
+	"html"
 	"os"
 	"regexp"
 	"strings"
@@ -73,5 +74,5 @@ func (cron *BreakingNewsCron) Execute() string {
 		}
 	}
 
-	return strings.Join(texts, "\n\n")
+	return html.UnescapeString(strings.Join(texts, "\n\n"))
 }
