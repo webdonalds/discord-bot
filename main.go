@@ -29,7 +29,8 @@ func main() {
 	})
 
 	botToken := os.Getenv("DISCORD_BOT_TOKEN")
-	bot, err := NewBot(botToken)
+	githubKey := os.Getenv("GITHUB_API_KEY")
+	bot, err := NewBot(botToken, githubKey)
 	if err != nil {
 		panic(err)
 	}

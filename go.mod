@@ -11,6 +11,7 @@ require (
 	github.com/hellodhlyn/delivery-tracker v0.0.0-20200613122159-d8f44b184a8c
 	github.com/kz/discordrus v1.2.0
 	github.com/robfig/cron/v3 v3.0.1
+	github.com/samber/lo v1.28.2
 	github.com/sirupsen/logrus v1.7.0
 	golang.org/x/text v0.3.2
 )
@@ -24,5 +25,6 @@ require (
 	github.com/gorilla/websocket v1.4.0 // indirect
 	go.opentelemetry.io/otel v0.11.0 // indirect
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/sys v0.0.0-20220919091848-fb04ddd9f9c8 // indirect
 )

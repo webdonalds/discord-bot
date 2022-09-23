@@ -22,4 +22,7 @@ COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /usr/src/app/dist /
 COPY --from=builder /usr/local/go/lib/time/zoneinfo.zip /usr/local/go/lib/time/zoneinfo.zip
 
+ARG GIT_SHA
+ENV CONTAINER_CURRENT_HASH $GIT_SHA
+
 CMD [ "/main" ]
