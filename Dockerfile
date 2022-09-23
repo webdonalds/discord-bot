@@ -1,5 +1,5 @@
 ### Builder
-FROM golang:1.14-alpine as builder
+FROM golang:1.18-alpine as builder
 RUN apk update && apk add git && apk add ca-certificates && apk add tzdata
 
 WORKDIR /usr/src/app
