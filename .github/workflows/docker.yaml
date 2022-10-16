@@ -2,21 +2,33 @@ name: Build and publish a docker image
 
 on:
   push:
-    tags: [ 'v*' ]
+    branches:
+      - master
 
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Build and push
-      run: |
-        DOCKER_IMAGE=webdonalds/discord-bot
-
-        docker login --username hellodhlyn --password ${{ secrets.DOCKER_ACCESS_TOKEN }}
-
-        docker build -t $DOCKER_IMAGE:latest .
-        docker tag $DOCKER_IMAGE:latest $DOCKER_IMAGE:${GITHUB_REF##*/}
-
-        docker push $DOCKER_IMAGE:latest
-        docker push $DOCKER_IMAGE:${GITHUB_REF##*/}
+      - uses: actions/checkout@v3
+      - name: Docker meta
+        id: docker_meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ghcr.io/webdonalds/discord-bot
+          tags: |
+            type=sha,format=long,prefix=
+            type=raw,value=latest
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          build-args: GIT_SHA=${{ github.sha }}
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
