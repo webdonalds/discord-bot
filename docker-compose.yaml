@@ -1,0 +1,7 @@
+version: '3'
+services:
+  valkey:
+    image: valkey/valkey:8
+    container_name: discord-bot-valkey
+    ports:
+    - 6379:6379

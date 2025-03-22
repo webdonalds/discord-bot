@@ -7,6 +7,10 @@
 ### 환경변수
 - `DISCORD_BOT_TOKEN`
 - `OPENAI_API_KEY`
+- Redis 설정
+  - `REDIS_URL`
+  - `REDIS_USERNAME`
+  - `REDIS_PASSWORD`
 
 ### 실행
 ```shell

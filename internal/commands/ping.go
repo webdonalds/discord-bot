@@ -17,6 +17,6 @@ func (c *PingCommand) Commands() []string {
 	return []string{"ping"}
 }
 
-func (c *PingCommand) Execute(ctx context.Context, args []string) (actions.Action, error) {
+func (c *PingCommand) Execute(ctx context.Context, args *CommandArgs) (actions.Action, error) {
 	return &actions.Reply{Message: "pong"}, nil
 }

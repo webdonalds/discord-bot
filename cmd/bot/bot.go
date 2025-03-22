@@ -46,7 +46,15 @@ func (bot *Bot) Listen() error {
 		command := strings.TrimPrefix(message.Content, "!")
 		args := strings.Split(command, " ")
 		if cmd, ok := bot.commands[args[0]]; ok {
-			action, err := cmd.Execute(context.Background(), args[1:])
+			commandArgs := &commands.CommandArgs{
+				Texts: args[1:],
+				Author: &commands.CommandArgsAuthor{
+					ID:   message.Author.ID,
+					Name: message.Author.Username,
+				},
+			}
+
+			action, err := cmd.Execute(context.Background(), commandArgs)
 			if err != nil {
 				action = &actions.Reply{Message: fmt.Sprintf("명령어 실행 중 오류가 발생했습니다:\n\n%v", err)}
 			}
