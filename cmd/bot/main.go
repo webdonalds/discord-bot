@@ -13,7 +13,8 @@ func main() {
 		log.Fatalf("Failed to create bot: %v", err)
 	}
 
-	bot.AddCommand(&commands.PingCommand{})
+	bot.AddCommand(commands.NewPingCommand())
+	bot.AddCommand(commands.NewChatCommand(os.Getenv("OPENAI_API_KEY")))
 
 	log.Fatalf("Failed to listen: %v", bot.Listen())
 }

@@ -6,6 +6,7 @@
 
 ### 환경변수
 - `DISCORD_BOT_TOKEN`
+- `OPENAI_API_KEY`
 
 ### 실행
 ```shell
