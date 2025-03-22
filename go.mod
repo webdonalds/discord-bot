@@ -1,8 +1,6 @@
 module github.com/webdonalds/discord-bot
 
-go 1.23.0
-
-toolchain go1.23.7
+go 1.24
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
