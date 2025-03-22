@@ -22,8 +22,6 @@ func (r *ReplyStream) Execute(ctx context.Context, session *discordgo.Session, m
 
 	// Process messages from the stream until it's closed
 	for msg := range r.MessageStream {
-		session.ChannelTyping(message.ChannelID)
-
 		if isFirstMessage {
 			if msg == "" {
 				continue
